@@ -147,7 +147,12 @@
                         {{ $product->quantity }}
                     </td>
                     <td class="px-6 py-4">
-                        {{ $product->image_url }}
+                        <img
+                            src="{{ $product->image_url }}"
+                            alt="{{ $product->name }}"
+                            class="h-10 w-10 rounded-md object-cover"
+                            onerror="this.onerror=null; this.src='https://placehold.co/40x40?text=No+Image'"
+                        >
                     </td>
                     <td class="px-6 py-4">
                         <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline" wire:click="edit({{ $product->id }})">Edit</a>

@@ -27,9 +27,16 @@ class Show extends Component
 
     public function mount($orderId)
     {
-        $this->order = Order::with(['customer', 'orderItems'])->findOrFail($orderId);
+        $this->order = Order::with([
+            'customer',
+            'orderItems',
+            'orderItems.product' => function($query) {
+                $query->select(['id', 'name', 'price']); // Add whatever columns you need
+            }
+        ])->findOrFail($orderId);
         $this->newStatus = $this->order->status;
         $this->newPaymentStatus = $this->order->payment_status;
+        Log::info($this->order);
     }
     public function render()
     {
