@@ -2,6 +2,13 @@
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-semibold">Orders</h2>
         <div class="flex gap-4">
+            <!-- Add Create Order Button -->
+            <a href="{{ url('order/create') }}" class="inline-flex items-center gap-x-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Create Order
+            </a>
 
             <!-- Filters Section -->
             <div class="flex items-center gap-3">

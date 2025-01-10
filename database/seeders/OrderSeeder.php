@@ -15,15 +15,7 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         Order::factory()
-            ->count(10)
-            ->create()
-            ->each(function ($order) {
-                // Dynamically assign 1 to 3 order items to each order
-                OrderItem::factory()
-                    ->count(rand(1, 3))
-                    ->for($order, 'order') // Associate with the current order
-                    ->create();
-            });
-
+            ->count(10) // Adjust the count as needed
+            ->create();
     }
 }
