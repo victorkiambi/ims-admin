@@ -1,47 +1,116 @@
-<div>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div class="bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg rounded-lg p-6 text-white">
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <div>
-                <h3 class="text-2xl font-semibold mb-2">Total Sales</h3>
-                <p class="text-4xl font-bold">{{ $totalSales }}</p>
+<div class="p-6">
+    {{-- Dashboard Metrics --}}
+    <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Dashboard Overview</h2>
+            <select wire:model.live="dateFilter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {{-- Total Revenue --}}
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 bg-opacity-75">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="mb-2 text-sm font-medium text-gray-600">Total Revenue</p>
+                        <p class="text-lg font-semibold text-gray-700">
+                            ${{ number_format($metrics['total_revenue'], 2) }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Total Orders --}}
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 bg-opacity-75">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="mb-2 text-sm font-medium text-gray-600">Total Orders</p>
+                        <p class="text-lg font-semibold text-gray-700">
+                            {{ $metrics['total_orders'] }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Total Products --}}
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 bg-opacity-75">
+                        <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="mb-2 text-sm font-medium text-gray-600">Total Products</p>
+                        <p class="text-lg font-semibold text-gray-700">
+                            {{ $metrics['total_products'] }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Total Customers --}}
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 bg-opacity-75">
+                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="mb-2 text-sm font-medium text-gray-600">Total Customers</p>
+                        <p class="text-lg font-semibold text-gray-700">
+                            {{ $metrics['total_customers'] }}
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-gradient-to-r from-green-500 to-green-600 shadow-lg rounded-lg p-6 text-white">
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-            <div>
-                <h3 class="text-2xl font-semibold mb-2">Total Orders</h3>
-                <p class="text-4xl font-bold">{{ $totalOrders }}</p>
+    {{-- Charts Grid --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {{-- Sales Trend Chart --}}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sales Trend</h3>
+            <div class="h-80">
+                <livewire:livewire-line-chart
+                    :line-chart-model="$salesChart"
+                />
             </div>
         </div>
-    </div>
 
-    <div class="bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg rounded-lg p-6 text-white">
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <div>
-                <h3 class="text-2xl font-semibold mb-2">Total Customers</h3>
-                <p class="text-4xl font-bold">{{ $totalCustomers }}</p>
+        {{-- Orders by Day Chart --}}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Orders by Day</h3>
+            <div class="h-80">
+                <livewire:livewire-column-chart
+                    :column-chart-model="$ordersByDayChart"
+                />
             </div>
         </div>
-    </div>
-</div>
-    <div>
-        <div class="mt-8">
-            <h2 class="text-2xl font-semibold mb-4">Sales Chart</h2>
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <!-- Sales Chart Component -->
-                <livewire:charts.sales-chart />
+
+        {{-- Payment Methods Chart --}}
+        <div class="bg-white rounded-lg shadow p-6 md:col-span-2">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Payment Methods Distribution</h3>
+            <div class="h-80">
+                <livewire:livewire-pie-chart
+                    :pie-chart-model="$paymentMethodsChart"
+                />
             </div>
         </div>
     </div>

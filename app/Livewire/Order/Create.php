@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Order;
 
-use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Product;
+use App\Models\Customer;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,30 +12,26 @@ class Create extends Component
 {
     use WithPagination;
 
-    public $currentStep = 1;
+    // Customer Selection
     public $customerSearch = '';
     public $selectedCustomerId = null;
-    public $items = [];
-    public $paymentDetails = [];
+    public $selectedCustomer = null;
 
-    // Step validation flags
-    public $canProceedToProducts = false;
-    public $canProceedToShipping = false;
-    public $canProceedToPayment = false;
-
+    // Order Items
+    public $orderItems = [];
     public $productSearch = '';
-    public $selectedProducts = [];
-    public $quantities = [];
-    public $customerAddresses = [];
+    public $searchResults = [];
 
-    protected $rules = [
-        'selectedProducts' => 'required|array|min:1',
-        'quantities.*' => 'required|integer|min:1'
-    ];
+    // Order Details
+    public $payment_method = 'cash';
+    public $notes;
+    public $total = 0;
+    public $status = 'pending';
 
+    // Address Details
+    public $useExistingAddress = true;
     public $selectedAddressId = null;
     public $shippingAddress = [
-        'type' => 'home',
         'address_line1' => '',
         'address_line2' => '',
         'city' => '',
@@ -42,159 +39,177 @@ class Create extends Component
         'postal_code' => '',
         'phone' => ''
     ];
+    public $useSameForBilling = true;
+    public $billingAddress = [
+        'address_line1' => '',
+        'address_line2' => '',
+        'city' => '',
+        'state' => '',
+        'postal_code' => '',
+        'phone' => ''
+    ];
+
+    protected $listeners = ['productSelected'];
+
     public function mount()
     {
-        $this->resetState();
+        $this->orderItems = [
+            $this->newOrderItem()
+        ];
     }
 
-    public function resetState()
+    private function newOrderItem()
     {
-        $this->currentStep = 1;
-        $this->customerSearch = '';
-        $this->selectedCustomerId = null;
-        $this->items = [];
-        $this->shippingAddress = [];
-        $this->paymentDetails = [];
-        $this->canProceedToProducts = false;
-        $this->canProceedToShipping = false;
-        $this->canProceedToPayment = false;
+        return [
+            'product_id' => '',
+            'product_name' => '',
+            'quantity' => 1,
+            'price' => 0,
+            'stock' => 0,
+            'subtotal' => 0
+        ];
     }
 
-    public function setStep($step)
+    public function searchCustomers()
     {
-        if ($step === 2 && !$this->canProceedToProducts) {
-            return;
+        if (strlen($this->customerSearch) >= 2) {
+            return Customer::where('name', 'like', "%{$this->customerSearch}%")
+                ->orWhere('email', 'like', "%{$this->customerSearch}%")
+                ->orWhere('phone', 'like', "%{$this->customerSearch}%")
+                ->take(5)
+                ->get();
         }
-        if ($step === 3 && !$this->canProceedToShipping) {
-            return;
-        }
-        if ($step === 4 && !$this->canProceedToPayment) {
-            return;
-        }
-
-        $this->currentStep = $step;
+        return [];
     }
 
     public function selectCustomer($customerId)
     {
+        $this->selectedCustomer = Customer::find($customerId);
         $this->selectedCustomerId = $customerId;
-        $this->canProceedToProducts = true;
-        $this->setStep(2);
+        $this->customerSearch = '';
     }
 
-    public function createNewCustomer()
+    public function searchProducts($index)
     {
-        // Logic to show customer creation modal or redirect
-    }
-
-    public function getCustomersProperty()
-    {
-        if (empty($this->customerSearch)) {
-            return collect();
-        }
-
-        return Customer::query()
-            ->where(function ($query) {
-                $query->where('name', 'like', "%{$this->customerSearch}%")
-                    ->orWhere('email', 'like', "%{$this->customerSearch}%")
-                    ->orWhere('phone', 'like', "%{$this->customerSearch}%");
-            })
-            ->withCount('orders')
-            ->orderBy('name')
-            ->take(5)
-            ->get();
-    }
-    public function addProduct($productId)
-    {
-        if (!in_array($productId, $this->selectedProducts)) {
-            $this->selectedProducts[] = $productId;
-            $this->quantities[$productId] = 1;
+        if (strlen($this->productSearch) >= 2) {
+            $this->searchResults = Product::where('status', 'active')
+                ->where(function ($query) {
+                    $query->where('name', 'like', "%{$this->productSearch}%")
+                        ->orWhere('sku', 'like', "%{$this->productSearch}%");
+                })
+                ->where('stock', '>', 0)
+                ->take(5)
+                ->get();
         }
     }
 
-    public function removeProduct($productId)
+    public function selectProduct($index, Product $product)
     {
-        $this->selectedProducts = array_values(array_filter(
-            $this->selectedProducts,
-            fn($id) => $id != $productId
-        ));
-        unset($this->quantities[$productId]);
+        $this->orderItems[$index]['product_id'] = $product->id;
+        $this->orderItems[$index]['product_name'] = $product->name;
+        $this->orderItems[$index]['price'] = $product->price;
+        $this->orderItems[$index]['stock'] = $product->stock;
+        $this->calculateSubtotal($index);
+        $this->productSearch = '';
+        $this->searchResults = [];
     }
 
-    public function updateQuantity($productId, $quantity)
+    public function addItem()
     {
-        $this->quantities[$productId] = max(1, intval($quantity));
+        $this->orderItems[] = $this->newOrderItem();
     }
 
-    public function getProductsProperty()
+    public function removeItem($index)
     {
-        if (empty($this->productSearch)) {
-            return collect();
+        unset($this->orderItems[$index]);
+        $this->orderItems = array_values($this->orderItems);
+        $this->calculateTotal();
+    }
+
+    public function calculateSubtotal($index)
+    {
+        $item = $this->orderItems[$index];
+        $this->orderItems[$index]['subtotal'] = $item['quantity'] * $item['price'];
+        $this->calculateTotal();
+    }
+
+    public function calculateTotal()
+    {
+        $this->total = collect($this->orderItems)->sum('subtotal');
+    }
+
+    public function updatedSelectedAddressId()
+    {
+        if ($this->selectedAddressId && $this->selectedCustomer) {
+            $address = $this->selectedCustomer->addresses()->find($this->selectedAddressId);
+            if ($address) {
+                $this->shippingAddress = [
+                    'address_line1' => $address->address_line1,
+                    'address_line2' => $address->address_line2,
+                    'city' => $address->city,
+                    'state' => $address->state,
+                    'postal_code' => $address->postal_code,
+                    'phone' => $address->phone
+                ];
+
+                if ($this->useSameForBilling) {
+                    $this->billingAddress = $this->shippingAddress;
+                }
+            }
         }
-
-        return Product::query()
-//            ->where('status', 'active')
-            ->where(function ($query) {
-                $query->where('name', 'like', "%{$this->productSearch}%");
-//                    ->orWhere('sku', 'like', "%{$this->productSearch}%");
-            })
-            ->get();
     }
 
-    public function getSelectedProductDetailsProperty()
-    {
-        return Product::whereIn('id', $this->selectedProducts)->get();
-    }
-
-    public function getOrderTotalProperty()
-    {
-        return $this->selectedProductDetails->sum(function ($product) {
-            return $product->price * ($this->quantities[$product->id] ?? 0);
-        });
-    }
-
-    public function proceedToShipping()
-    {
-        // Validate products are selected
-        if (empty($this->selectedProducts)) {
-            return;
-        }
-
-        // Enable shipping step and move to it
-        $this->canProceedToShipping = true;
-        $this->currentStep = 3;
-    }
-    public function getCustomerAddressesProperty()
-    {
-        if (!$this->selectedCustomerId) {
-            return collect(); // Return empty collection if no customer selected
-        }
-
-        return Customer::find($this->selectedCustomerId)
-            ->addresses()
-            ->get(); // This returns a collection instead of an array
-    }
-
-    public function updatedSelectedAddressId($value)
+    public function updatedUseSameForBilling($value)
     {
         if ($value) {
-            $address = $this->customerAddresses->find($value);
-            $this->shippingAddress = [
-                'type' => $address->type,
-                'address_line1' => $address->address_line1,
-                'address_line2' => $address->address_line2,
-                'city' => $address->city,
-                'state' => $address->state,
-                'postal_code' => $address->postal_code,
-                'phone' => $address->phone
-            ];
+            $this->billingAddress = $this->shippingAddress;
         }
     }
+
+    public function save()
+    {
+        $this->validate([
+            'selectedCustomerId' => 'required',
+            'orderItems.*.product_id' => 'required',
+            'orderItems.*.quantity' => 'required|integer|min:1',
+            'payment_method' => 'required|in:cash,credit_card,bank_transfer',
+            'shippingAddress.address_line1' => 'required',
+            'shippingAddress.city' => 'required',
+            'shippingAddress.state' => 'required',
+            'shippingAddress.postal_code' => 'required',
+            'shippingAddress.phone' => 'required',
+        ]);
+
+        $order = Order::create([
+            'customer_id' => $this->selectedCustomerId,
+            'total' => $this->total,
+            'status' => $this->status,
+            'payment_method' => $this->payment_method,
+            'shipping_address' => json_encode($this->shippingAddress),
+            'billing_address' => json_encode($this->useSameForBilling ? $this->shippingAddress : $this->billingAddress),
+            'notes' => $this->notes,
+        ]);
+
+        foreach ($this->orderItems as $item) {
+            $order->orderItems()->create([
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price']
+            ]);
+
+            // Update product stock
+            Product::find($item['product_id'])->decrement('stock', $item['quantity']);
+        }
+
+        session()->flash('success', 'Order created successfully!');
+        return $this->redirect('/orders', navigate: true);
+    }
+
     public function render()
     {
         return view('livewire.order.create', [
-            'customers' => $this->customers,
+            'customers' => strlen($this->customerSearch) >= 2 ? $this->searchCustomers() : [],
+            'customerAddresses' => $this->selectedCustomer ? $this->selectedCustomer->addresses : collect(),
         ]);
     }
-
 }

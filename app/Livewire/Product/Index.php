@@ -40,7 +40,7 @@ class Index extends Component
 
     public function edit($id)
     {
-        return redirect()->to('products/' . $id . '/edit');
+        return redirect()->to('product/edit/' . $id);
     }
 
     public function updatingSearch()

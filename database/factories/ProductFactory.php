@@ -21,13 +21,14 @@ class ProductFactory extends Factory
         return [
             'name' => $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
-            'cost' => $cost = $this->faker->randomFloat(2, 1, 1000),
-            'price' => $this->faker->randomFloat(2, $cost + 1, $cost + 1000),
-            'code' => $this->faker->numberBetween(),
+            'price' => $this->faker->randomFloat(2, 1, 1000),
+            'stock' => $this->faker->numberBetween(1, 100),
             'quantity' => $this->faker->numberBetween(1, 100),
+            'sku' => $this->faker->unique()->ean8(),
             'image_url' => 'https://picsum.photos/id/' . $this->faker->numberBetween(0, 100) . '/200/300',
             'category_id' => rand(1, Category::count()),
             'type' => ProductType::factory(),
+            'status' => 'active'
             ];
     }
 }

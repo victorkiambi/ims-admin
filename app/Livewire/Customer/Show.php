@@ -17,9 +17,9 @@ class Show extends Component
     #[Url]
     public $orderSearch = '';
 
-    public function mount($customerId)
+    public function mount($customer)
     {
-        $this->customer = Customer::findOrFail($customerId);
+        $this->customer = Customer::findOrFail($customer);
     }
 
     public function render()

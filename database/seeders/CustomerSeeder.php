@@ -24,9 +24,15 @@ class CustomerSeeder extends Seeder
                 $orderCount = rand(1, 3);
 
                 for ($i = 0; $i < $orderCount; $i++) {
+                    // Generate a random date between 6 months ago and now
+                    $orderDate = fake()->dateTimeBetween('-6 months', 'now');
+                    
                     $order = Order::factory()
                         ->for($customer, 'customer')
-                        ->create();
+                        ->create([
+                            'created_at' => $orderDate,
+                            'updated_at' => $orderDate,
+                        ]);
 
                     // Generate a random number of order items (1-5)
                     $orderItemCount = rand(1, 5);

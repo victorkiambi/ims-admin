@@ -18,25 +18,30 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('products', Index::class);
-    Route::get('product/create', Create::class);
-    Route::get('product/edit/{productId}', Create::class);
+    Route::get('products', \App\Livewire\Product\Index::class);
+    Route::get('products/create', \App\Livewire\Product\Create::class);
+    Route::get('products/{product}/edit', \App\Livewire\Product\Edit::class);
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('orders', \App\Livewire\Order\Index::class);
-    Route::get('order/create', \App\Livewire\Order\Create::class);
-    Route::get('order/edit/{orderId}', \App\Livewire\Order\Create::class);
-    Route::get('order/{orderId}', \App\Livewire\Order\Show::class);
+    Route::get('orders/create', \App\Livewire\Order\Create::class);
+    Route::get('orders/{order}', \App\Livewire\Order\Show::class);
+    Route::get('orders/{order}/edit', \App\Livewire\Order\Edit::class);
 });
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('customers', \App\Livewire\Customer\Index::class);
-    Route::get('customer/edit/{customerId}', \App\Livewire\Customer\Edit::class);
-    Route::get('customer/show/{customerId}', Show::class);
+    Route::get('customers/{customer}', \App\Livewire\Customer\Show::class);
+    Route::get('customers/{customer}/edit', \App\Livewire\Customer\Edit::class);
 
 });
 //Category
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('category', \App\Livewire\Category\Index::class);
 });
+//Sales
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('sales', \App\Livewire\Sales\Index::class);
+});
+
 
 require __DIR__.'/auth.php';

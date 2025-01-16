@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('shipping_city');
             $table->string('shipping_county');
             $table->string('shipping_country');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

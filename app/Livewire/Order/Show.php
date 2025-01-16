@@ -25,7 +25,7 @@ class Show extends Component
         'paymentNote' => 'nullable|string|max:255'
     ];
 
-    public function mount($orderId)
+    public function mount($order)
     {
         $this->order = Order::with([
             'customer',
@@ -33,7 +33,7 @@ class Show extends Component
             'orderItems.product' => function($query) {
                 $query->select(['id', 'name', 'price']); // Add whatever columns you need
             }
-        ])->findOrFail($orderId);
+        ])->findOrFail($order);
         $this->newStatus = $this->order->status;
         $this->newPaymentStatus = $this->order->payment_status;
         Log::info($this->order);
