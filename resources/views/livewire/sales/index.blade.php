@@ -22,9 +22,9 @@
                     </div>
                     <div class="ml-4">
                         <p class="mb-2 text-sm font-medium text-gray-600">Total Sales</p>
-                        <p class="text-lg font-semibold text-gray-700">
-                            ${{ number_format($metrics['total_sales'], 2) }}
-                        </p>
+                        <!-- <p class="text-lg font-semibold text-gray-700">
+                            ${{$metrics['total_sales'] }}
+                        </p> -->
                     </div>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                     @foreach($recentOrders as $order)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $order->id }}
+                                {{ $order->order_number }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $order->customer->name }}
@@ -138,4 +138,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> 

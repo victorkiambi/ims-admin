@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //Sales
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('sales', \App\Livewire\Sales\Index::class);
+    Route::get('sales/{orderId}', \App\Livewire\Sales\Show::class);
 });
 
 
